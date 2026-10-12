@@ -34,7 +34,6 @@ jobs:
   # job: e2e_tests
   e2e_tests:
     if: false # NOTE: toggled off
-    needs: [backend_lint_test]
     timeout-minutes: 60
     runs-on: ubuntu-latest
     env:
@@ -59,7 +58,10 @@ jobs:
   # job: bump version (patch)
   tag_release:
     needs: [frontend_lint_test_build, backend_lint_test, e2e_tests]
-    if: ${{ github.event_name == 'push' && !contains(join(github.event.commits.*.message, ' | '), '#notag') }}
+    if: ${{ !failure() && !cancelled() }}
+    env:
+      NOTAG: ${{ contains(join(github.event.commits.*.message, ' | '), '#notag') }}
+      MINOR: ${{ contains(join(github.event.commits.*.message, ' | '), '#minor') }} # unused atm
     permissions:
       contents: write
     runs-on: ubuntu-latest
@@ -68,21 +70,21 @@ jobs:
         with:
           fetch-depth: '0'
       - name: Bump version and push tag
+        if: ${{ env.NOTAG != 'true' }}
         uses: anothrNick/github-tag-action@1.75.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEFAULT_BUMP: patch
   # job: deploy to Render
-  # deploy_to_render:
-  #   needs:
-  #     - lint_and_tests
-  #     - playwright_tests
-  #     - tag_release
-  #   if: ${{ github.event_name == 'push' }}
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Call Deploy Hook
-  #       if: ${{ !contains(join(github.event.commits.*.message, ' | '), '#nodeploy') }}
-  #       run: |
-  #         curl --fail -sS "${{ secrets.RENDER_DEPLOY_HOOK }}"
+  deploy_to_render:
+    needs: [frontend_lint_test_build, backend_lint_test, e2e_tests]
+    if: ${{ !failure() && !cancelled() }}
+    env:
+      NODEPLOY: ${{ contains(join(github.event.commits.*.message, ' | '), '#nodeploy') }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Deploy Hook
+        if: ${{ env.NODEPLOY != 'true' }}
+        run: |
+          curl --fail -sS "${{ secrets.RENDER_DEPLOY_HOOK }}"
 
