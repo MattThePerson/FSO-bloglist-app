@@ -9,8 +9,16 @@
     "dev": "cross-env NODE_ENV=development node index.js --watch",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "lint:frontend": "npm --prefix frontend run lint",
+    "lint:all": "npm run lint && npm run lint:frontend",
     "test": "cross-env NODE_ENV=test node --test --test-concurrency=1",
-    "test:match": "npm test -- --test-name-pattern"
+    "test:match": "npm test -- --test-name-pattern",
+    "test:frontend": "npm --prefix frontend test",
+    "test:all": "npm test && npm run test:frontend",
+    "install:frontend": "npm --prefix frontend ci",
+    "install:all": "npm ci && npm run install:frontend",
+    "build:frontend": "npm --prefix frontend run build",
+    "boop": "echo BOOP"
   },
   "author": "Matt Stirling",
   "license": "ISC",

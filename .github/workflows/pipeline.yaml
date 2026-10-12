@@ -20,17 +20,15 @@ jobs:
   # job: Lint and Tests
   frontend_lint_test_build:
     runs-on: ubuntu-latest
-    defaults:
-      working-directory: ./frontend
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
           node-version: '24'
-      - run: npm install
-      - run: npm run lint
-      - run: npm test
-      - run: npm run build
+      - run: npm run install:frontend
+      - run: npm run lint:frontend
+      - run: npm run test:frontend
+      - run: npm run build:frontend
   # job: e2e_tests
   e2e_tests:
     timeout-minutes: 60
@@ -40,11 +38,9 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 24
-      - name: Install backend
-        run: npm install
-      - name: Install & build frontend
-        run: cd frontend && npm install && npm run build
-      - nme: Install playwright & browsers
+      - name: Install and build frontend and backend
+        run: npm run install:all && npm run build:frontend
+      - name: Install playwright & browsers
         run: cd e2e-tests && npm install && npx playwright install --with-deps
       - name: Run Playwright tests
         run: cd e2e-tests && npm test
