@@ -43,7 +43,7 @@ app.use("/api/health", (_req, res) => {
 });
 
 app.use("/api/version", (_req, res) => {
-  res.send(2);
+  res.send(3);
 });
 
 app.use("/api", (_req, res) => {
