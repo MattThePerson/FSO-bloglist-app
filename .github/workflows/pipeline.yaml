@@ -4,6 +4,7 @@ name: Deploy pipeline
 on:
   push:
     branches: [main]
+  pull_request: [main]
 
 jobs:
   # job: backend lint and test
