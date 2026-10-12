@@ -53,9 +53,7 @@ jobs:
           retention-days: 30
   # job: bump version (patch)
   tag_release:
-    needs:
-      - lint_and_tests
-      - playwright_tests
+    needs: [frontend_lint_test_build, backend_lint_test, e2e-tests]
     if: ${{ github.event_name == 'push' && !contains(join(github.event.commits.*.message, ' | '), '#notag') }}
     permissions:
       contents: write
