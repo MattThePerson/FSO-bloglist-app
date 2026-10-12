@@ -72,7 +72,7 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: "PORT=3004 && npm run start:test",
+      command: "PORT=3004 npm run start:test",
       cwd: "..",
       url: "http://localhost:3004",
       reuseExistingServer: !process.env.CI,

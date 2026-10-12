@@ -31,20 +31,21 @@ app.use("/api/blogs", middleware.userExtractor, blogsRouter);
 app.use("/api/users", usersRouter);
 app.use("/api/login", loginRouter);
 
+// routes for testing
+if (process.env.NODE_ENV === "test") {
+  logger.info("adding /api/testing");
+  const testRouter = require("./controllers/testing");
+  app.use("/api/testing", testRouter);
+}
+
 app.use("/api", (_req, res) => {
-  res.status(404).json({ error: "unknown endpoint" });
+  res.status(404).json({ error: "i dont know that endpoint" });
 });
 
 // catch frontend routes
 app.use((_req, res) => {
   res.sendFile(path.join(__dirname, "frontend", "dist", "index.html"));
 });
-
-// routes for testing
-if (process.env.NODE_ENV === "test") {
-  const testRouter = require("./controllers/testing");
-  app.use("/api/testing", testRouter);
-}
 
 app.use(middleware.unknownEndpoint);
 app.use(middleware.errorHandler);
