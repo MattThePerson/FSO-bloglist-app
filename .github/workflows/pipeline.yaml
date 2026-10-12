@@ -1,0 +1,88 @@
+
+name: Deploy pipeline
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  # job: backend lint and test
+  backend_lint_test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - run: npm install
+      - run: npm run lint
+      - run: npm test
+  # job: Lint and Tests
+  frontend_lint_test_build:
+    runs-on: ubuntu-latest
+    defaults:
+      working-directory: ./frontend
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - run: npm install
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+  # job: e2e_tests
+  e2e_tests:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - name: Install backend
+        run: npm install
+      - name: Install & build frontend
+        run: cd frontend && npm install && npm run build
+      - nme: Install playwright & browsers
+        run: cd e2e-tests && npm install && npx playwright install --with-deps
+      - name: Run Playwright tests
+        run: cd e2e-tests && npm test
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
+  # job: bump version (patch)
+  # tag_release:
+  #   needs:
+  #     - lint_and_tests
+  #     - playwright_tests
+  #   if: ${{ github.event_name == 'push' && !contains(join(github.event.commits.*.message, ' | '), '#skip') }}
+  #   permissions:
+  #     contents: write
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v6
+  #       with:
+  #         fetch-depth: '0'
+  #     - name: Bump version and push tag
+  #       uses: anothrNick/github-tag-action@1.75.0
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #         DEFAULT_BUMP: patch
+  # job: deploy to Render
+  # deploy_to_render:
+  #   needs:
+  #     - lint_and_tests
+  #     - playwright_tests
+  #     - tag_release
+  #   if: ${{ github.event_name == 'push' }}
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Call Deploy Hook
+  #       if: ${{ !contains(join(github.event.commits.*.message, ' | '), '#nodeploy') }}
+  #       run: |
+  #         curl --fail -sS "${{ secrets.RENDER_DEPLOY_HOOK }}"
+
