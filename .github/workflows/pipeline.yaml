@@ -59,7 +59,7 @@ jobs:
   # job: bump version (patch)
   tag_release:
     needs: [frontend_lint_test_build, backend_lint_test]
-    if: ${{ !failure() && !cancelled() }}
+    if: ${{ github.event_name == 'push' && !failure() && !cancelled() }}
     env:
       NOTAG: ${{ contains(join(github.event.commits.*.message, ' | '), '#notag') }}
       MINOR: ${{ contains(join(github.event.commits.*.message, ' | '), '#minor') }} # unused atm
@@ -79,7 +79,7 @@ jobs:
   # job: deploy to Render
   deploy_to_render:
     needs: [frontend_lint_test_build, backend_lint_test]
-    if: ${{ !failure() && !cancelled() }}
+    if: ${{ github.event_name == 'push' && !failure() && !cancelled() }}
     env:
       NODEPLOY: ${{ contains(join(github.event.commits.*.message, ' | '), '#nodeploy') }}
     runs-on: ubuntu-latest
