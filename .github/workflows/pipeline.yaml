@@ -31,6 +31,7 @@ jobs:
       - run: npm run build:frontend
   # job: e2e_tests
   e2e_tests:
+    needs: [backend_lint_test]
     timeout-minutes: 60
     runs-on: ubuntu-latest
     steps:
@@ -51,23 +52,23 @@ jobs:
           path: playwright-report/
           retention-days: 30
   # job: bump version (patch)
-  # tag_release:
-  #   needs:
-  #     - lint_and_tests
-  #     - playwright_tests
-  #   if: ${{ github.event_name == 'push' && !contains(join(github.event.commits.*.message, ' | '), '#skip') }}
-  #   permissions:
-  #     contents: write
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v6
-  #       with:
-  #         fetch-depth: '0'
-  #     - name: Bump version and push tag
-  #       uses: anothrNick/github-tag-action@1.75.0
-  #       env:
-  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #         DEFAULT_BUMP: patch
+  tag_release:
+    needs:
+      - lint_and_tests
+      - playwright_tests
+    if: ${{ github.event_name == 'push' && !contains(join(github.event.commits.*.message, ' | '), '#notag') }}
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: '0'
+      - name: Bump version and push tag
+        uses: anothrNick/github-tag-action@1.75.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DEFAULT_BUMP: patch
   # job: deploy to Render
   # deploy_to_render:
   #   needs:

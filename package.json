@@ -18,6 +18,7 @@
     "install:frontend": "npm --prefix frontend ci",
     "install:all": "npm ci && npm run install:frontend",
     "build:frontend": "npm --prefix frontend run build",
+    "setup": "npm run install:all && npm run build:frontend",
     "boop": "echo BOOP"
   },
   "author": "Matt Stirling",
