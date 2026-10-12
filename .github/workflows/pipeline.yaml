@@ -33,7 +33,6 @@ jobs:
       - run: npm run build:frontend
   # job: e2e_tests
   e2e_tests:
-    if: false # NOTE: toggled off
     timeout-minutes: 60
     runs-on: ubuntu-latest
     env:
@@ -57,7 +56,7 @@ jobs:
           retention-days: 30
   # job: bump version (patch)
   tag_release:
-    needs: [frontend_lint_test_build, backend_lint_test, e2e_tests]
+    needs: [frontend_lint_test_build, backend_lint_test]
     if: ${{ !failure() && !cancelled() }}
     env:
       NOTAG: ${{ contains(join(github.event.commits.*.message, ' | '), '#notag') }}
@@ -77,7 +76,7 @@ jobs:
           DEFAULT_BUMP: patch
   # job: deploy to Render
   deploy_to_render:
-    needs: [frontend_lint_test_build, backend_lint_test, e2e_tests]
+    needs: [frontend_lint_test_build, backend_lint_test]
     if: ${{ !failure() && !cancelled() }}
     env:
       NODEPLOY: ${{ contains(join(github.event.commits.*.message, ' | '), '#nodeploy') }}

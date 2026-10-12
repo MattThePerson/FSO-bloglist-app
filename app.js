@@ -38,6 +38,14 @@ if (process.env.NODE_ENV === "test") {
   app.use("/api/testing", testRouter);
 }
 
+app.use("/api/health", (_req, res) => {
+  res.json({ message: "up and running!" });
+});
+
+app.use("/api/version", (_req, res) => {
+  res.send(1);
+});
+
 app.use("/api", (_req, res) => {
   res.status(404).json({ error: "i dont know that endpoint" });
 });
